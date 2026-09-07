@@ -31,6 +31,7 @@ class SlideType(str, Enum):
     TABLE = "table"            # Native table
     QUOTE = "quote"            # Pull quote
     IMAGE = "image"            # Full-bleed / captioned image
+    GALLERY = "gallery"        # Grid of images with captions (portfolio)
     CLOSING = "closing"        # Thank-you / call to action
 
 
@@ -90,6 +91,14 @@ class TableData:
 
 
 @dataclass
+class ImageItem:
+    """One image in a gallery / portfolio grid."""
+
+    path: str
+    caption: str = ""
+
+
+@dataclass
 class Slide:
     """A single slide. Only the fields relevant to ``type`` need to be set."""
 
@@ -105,6 +114,7 @@ class Slide:
     attribution: str = ""
     image_path: str = ""
     caption: str = ""
+    images: List[ImageItem] = field(default_factory=list)  # for gallery
     notes: str = ""  # speaker notes
 
     def to_dict(self) -> Dict[str, Any]:
@@ -131,6 +141,8 @@ class Slide:
             data["image_path"] = self.image_path
         if self.caption:
             data["caption"] = self.caption
+        if self.images:
+            data["images"] = [asdict(im) for im in self.images]
         if self.notes:
             data["notes"] = self.notes
         return data
@@ -156,6 +168,8 @@ class Slide:
             td = data["table"]
             table = TableData(headers=list(td.get("headers", [])), rows=[list(r) for r in td.get("rows", [])])
 
+        images = [_image_from_dict(im) for im in data.get("images", [])]
+
         return cls(
             type=SlideType(data["type"]),
             title=data.get("title", ""),
@@ -169,6 +183,7 @@ class Slide:
             attribution=data.get("attribution", ""),
             image_path=data.get("image_path", ""),
             caption=data.get("caption", ""),
+            images=images,
             notes=data.get("notes", ""),
         )
 
@@ -178,6 +193,13 @@ def _bullet_from_dict(b: Any) -> Bullet:
     if isinstance(b, str):
         return Bullet(text=b)
     return Bullet(text=b.get("text", ""), level=b.get("level", 0), bold_lead=b.get("bold_lead"))
+
+
+def _image_from_dict(im: Any) -> ImageItem:
+    """Accept either a plain path string or a full image dict."""
+    if isinstance(im, str):
+        return ImageItem(path=im)
+    return ImageItem(path=im.get("path", ""), caption=im.get("caption", ""))
 
 
 @dataclass

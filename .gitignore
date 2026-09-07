@@ -22,3 +22,6 @@ output/
 
 # Secrets
 .env
+
+# local preview scratch
+.preview/

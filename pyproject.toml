@@ -23,7 +23,8 @@ dependencies = [
 
 [project.optional-dependencies]
 kimi = ["openai>=1.0.0"]
-dev = ["pytest>=7.0"]
+images = ["Pillow>=9.0"]
+dev = ["pytest>=7.0", "Pillow>=9.0"]
 
 [project.scripts]
 kimiagent = "kimiagent.cli:main"
