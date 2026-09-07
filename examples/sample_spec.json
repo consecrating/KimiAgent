@@ -1,0 +1,116 @@
+{
+  "title": "The State of Renewable Energy in 2026",
+  "subtitle": "Momentum, economics and the road ahead",
+  "author": "KimiAgent Demo",
+  "theme": "forest",
+  "slides": [
+    {
+      "type": "cover",
+      "title": "The State of Renewable Energy in 2026",
+      "subtitle": "Momentum, economics and the road ahead"
+    },
+    {
+      "type": "agenda",
+      "title": "Agenda",
+      "bullets": [
+        "Where we are today",
+        "The economics have flipped",
+        "Growth by technology",
+        "Barriers that remain",
+        "What to do next"
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Where we are today",
+      "subtitle": "Part 1"
+    },
+    {
+      "type": "stats",
+      "title": "The 2026 snapshot",
+      "subtitle": "Illustrative figures",
+      "stats": [
+        { "value": "38%", "label": "Global electricity from renewables", "detail": "up from 29% in 2020" },
+        { "value": "$1.9T", "label": "Annual clean-energy investment", "detail": "record high" },
+        { "value": "2.4x", "label": "Solar capacity vs. 2021", "detail": "fastest-growing source" }
+      ]
+    },
+    {
+      "type": "section",
+      "title": "The economics have flipped",
+      "subtitle": "Part 2"
+    },
+    {
+      "type": "chart",
+      "title": "Levelised cost of electricity ($/MWh)",
+      "chart": {
+        "chart_type": "line",
+        "categories": ["2016", "2018", "2020", "2022", "2024", "2026"],
+        "series": [
+          { "name": "Solar PV", "values": [88, 60, 42, 36, 30, 26] },
+          { "name": "Onshore wind", "values": [70, 55, 45, 40, 36, 33] },
+          { "name": "Gas peaker", "values": [140, 145, 150, 158, 165, 170] }
+        ],
+        "unit": "$/MWh"
+      },
+      "notes": "Illustrative trend: renewables kept falling while fossil peakers rose. Replace with sourced data."
+    },
+    {
+      "type": "two_column",
+      "title": "Renewables vs. fossil baseload",
+      "columns": [
+        [
+          { "text": "Renewables", "bold_lead": "Advantages" },
+          { "text": "Near-zero marginal cost" },
+          { "text": "Fast to deploy at scale" },
+          { "text": "No fuel-price exposure" }
+        ],
+        [
+          { "text": "Fossil", "bold_lead": "Challenges" },
+          { "text": "Rising carbon and fuel costs" },
+          { "text": "Long build times" },
+          { "text": "Stranded-asset risk" }
+        ]
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Barriers that remain",
+      "subtitle": "Part 3"
+    },
+    {
+      "type": "table",
+      "title": "Barriers and mitigations",
+      "table": {
+        "headers": ["Barrier", "Severity", "Mitigation", "Owner"],
+        "rows": [
+          ["Grid interconnection queues", "High", "Fast-track permitting", "Regulators"],
+          ["Storage duration", "Medium", "Long-duration batteries", "Industry"],
+          ["Supply-chain concentration", "Medium", "Diversify sourcing", "Policy + industry"],
+          ["Skilled labour", "Medium", "Training pipelines", "Government"]
+        ]
+      }
+    },
+    {
+      "type": "quote",
+      "quote": "The Stone Age didn't end for lack of stones — and the fossil age won't end for lack of fuel.",
+      "attribution": "Adapted from Sheikh Zaki Yamani"
+    },
+    {
+      "type": "bullets",
+      "title": "What to do next",
+      "bullets": [
+        { "text": "Move first where economics already win", "bold_lead": "Act" },
+        { "text": "Invest in grid flexibility and storage" },
+        { "text": "De-risk supply chains now, not later" },
+        { "text": "Set a measurable 24-month target" }
+      ],
+      "notes": "Close on a concrete, near-term commitment."
+    },
+    {
+      "type": "closing",
+      "title": "Thank you",
+      "subtitle": "Questions & discussion"
+    }
+  ]
+}
