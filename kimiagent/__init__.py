@@ -22,6 +22,7 @@ from .models import (
     ChartData,
     ChartSeries,
     TableData,
+    ImageItem,
 )
 from .agent import DeckAgent
 from .renderer import render_deck
@@ -36,6 +37,7 @@ __all__ = [
     "ChartData",
     "ChartSeries",
     "TableData",
+    "ImageItem",
     "DeckAgent",
     "render_deck",
     "THEMES",

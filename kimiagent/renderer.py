@@ -20,7 +20,9 @@ from pptx.enum.shapes import MSO_SHAPE
 from pptx.chart.data import CategoryChartData
 from pptx.enum.chart import XL_CHART_TYPE, XL_LEGEND_POSITION
 
-from .models import Deck, Slide, SlideType, Bullet, Stat, ChartData, TableData
+import struct
+
+from .models import Deck, Slide, SlideType, Bullet, Stat, ChartData, TableData, ImageItem
 from .themes import Theme, get_theme
 
 
@@ -33,6 +35,21 @@ CONTENT_W = SLIDE_W - 2 * MARGIN
 
 def _rgb(hex_str: str) -> RGBColor:
     return RGBColor.from_string(hex_str)
+
+
+def _luminance(hex_str: str) -> float:
+    """Relative luminance (0=black, 1=white) of an RRGGBB colour."""
+    r = int(hex_str[0:2], 16) / 255.0
+    g = int(hex_str[2:4], 16) / 255.0
+    b = int(hex_str[4:6], 16) / 255.0
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
+def _contrast(a: str, b: str) -> float:
+    """WCAG-style contrast ratio between two colours (1 = none, 21 = max)."""
+    la, lb = _luminance(a), _luminance(b)
+    hi, lo = max(la, lb), min(la, lb)
+    return (hi + 0.05) / (lo + 0.05)
 
 
 class DeckRenderer:
@@ -60,6 +77,7 @@ class DeckRenderer:
             SlideType.TABLE: self._table,
             SlideType.QUOTE: self._quote,
             SlideType.IMAGE: self._image,
+            SlideType.GALLERY: self._gallery,
             SlideType.CLOSING: self._closing,
         }
         total = len(self.deck.slides)
@@ -126,6 +144,17 @@ class DeckRenderer:
         run.font.name = font or self.theme.body_font
         return box
 
+    def _title_color(self, bg_hex: str) -> str:
+        """A legible title colour on ``bg_hex``.
+
+        Uses the theme's rich primary when it reads clearly against the
+        background (light themes), otherwise falls back to the light body
+        colour so titles stay legible on dark themes.
+        """
+        if _contrast(self.theme.primary, bg_hex) >= 2.8:
+            return self.theme.primary
+        return self.theme.text
+
     def _accent_bar(self, slide, top=None):
         """A short accent bar used as a heading underline motif."""
         top = top if top is not None else Inches(1.55)
@@ -134,7 +163,7 @@ class DeckRenderer:
     def _heading(self, slide, title: str, subtitle: str = ""):
         self._text(
             slide, MARGIN, Inches(0.55), CONTENT_W, Inches(0.9),
-            title, 30, self.theme.primary, bold=True, font=self.theme.heading_font,
+            title, 30, self._title_color(self.theme.background), bold=True, font=self.theme.heading_font,
         )
         self._accent_bar(slide)
         if subtitle:
@@ -211,7 +240,7 @@ class DeckRenderer:
             )
         self._text(
             slide, Inches(0.85), Inches(3.15), Inches(11.6), Inches(1.6),
-            s.title, 40, self.theme.primary, bold=True, font=self.theme.heading_font,
+            s.title, 40, self._title_color(self.theme.surface), bold=True, font=self.theme.heading_font,
         )
 
     def _bullets(self, slide, s: Slide):
@@ -431,7 +460,7 @@ class DeckRenderer:
         )
         self._text(
             slide, Inches(1.4), Inches(2.5), Inches(10.5), Inches(2.6),
-            s.quote, 28, self.theme.primary, italic=True, bold=True,
+            s.quote, 28, self._title_color(self.theme.surface), italic=True, bold=True,
             anchor=MSO_ANCHOR.MIDDLE, font=self.theme.heading_font, line_spacing=1.15,
         )
         if s.attribution:
@@ -444,29 +473,147 @@ class DeckRenderer:
         self._body_background(slide)
         if s.title:
             self._heading(slide, s.title, s.subtitle)
-        top = Inches(1.9) if s.title else Inches(0.7)
-        placed = False
-        if s.image_path:
-            try:
-                slide.shapes.add_picture(
-                    s.image_path, MARGIN, top, width=CONTENT_W,
-                )
-                placed = True
-            except Exception:
-                placed = False
+        top = Inches(1.9) if s.title else Inches(0.55)
+        bottom_reserve = Inches(0.95) if s.caption else Inches(0.55)
+        box_top = top
+        box_h = SLIDE_H - box_top - bottom_reserve
+        box_left, box_w = MARGIN, CONTENT_W
+
+        placed = self._place_image_contained(slide, s.image_path, box_left, box_top, box_w, box_h)
         if not placed:
-            # Draw a friendly placeholder panel.
-            self._rect(slide, MARGIN, top, CONTENT_W, SLIDE_H - top - Inches(1.0), self.theme.surface)
+            self._rect(slide, box_left, box_top, box_w, box_h, self.theme.surface)
             self._text(
-                slide, MARGIN, top + Inches(1.4), CONTENT_W, Inches(1.0),
+                slide, box_left, box_top + box_h / 2 - Inches(0.4), box_w, Inches(0.8),
                 s.caption or "[ image ]", 16, self.theme.text_muted,
                 align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE,
             )
-        if s.caption and placed:
+        if s.caption:
             self._text(
-                slide, MARGIN, SLIDE_H - Inches(0.95), CONTENT_W, Inches(0.4),
-                s.caption, 12, self.theme.text_muted, italic=True, align=PP_ALIGN.CENTER,
+                slide, MARGIN, SLIDE_H - Inches(0.9), CONTENT_W, Inches(0.4),
+                s.caption, 13, self.theme.text_muted, italic=True, align=PP_ALIGN.CENTER,
             )
+
+    def _gallery(self, slide, s: Slide):
+        """A responsive grid of images, each contain-fit with a caption."""
+        self._body_background(slide)
+        self._heading(slide, s.title, s.subtitle)
+        items = s.images
+        if not items:
+            return
+
+        n = len(items)
+        cols = _grid_columns(n)
+        rows = (n + cols - 1) // cols
+
+        area_left = MARGIN
+        area_top = Inches(1.85) if (s.title or s.subtitle) else Inches(0.6)
+        area_w = CONTENT_W
+        area_h = SLIDE_H - area_top - Inches(0.65)
+
+        gutter = Inches(0.3)
+        cell_w = (area_w - gutter * (cols - 1)) / cols
+        cell_h = (area_h - gutter * (rows - 1)) / rows
+        caption_h = Inches(0.42)
+
+        for i, item in enumerate(items):
+            r, c = divmod(i, cols)
+            cx = area_left + c * (cell_w + gutter)
+            cy = area_top + r * (cell_h + gutter)
+            # Soft card behind each image.
+            self._rect(slide, cx, cy, cell_w, cell_h, self.theme.surface)
+            img_box_h = cell_h - (caption_h if item.caption else Inches(0.0))
+            placed = self._place_image_contained(
+                slide, item.path,
+                cx + Inches(0.08), cy + Inches(0.08),
+                cell_w - Inches(0.16), img_box_h - Inches(0.16),
+            )
+            if not placed:
+                self._text(
+                    slide, cx, cy + img_box_h / 2 - Inches(0.3), cell_w, Inches(0.6),
+                    "[ image ]", 12, self.theme.text_muted,
+                    align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE,
+                )
+            if item.caption:
+                self._text(
+                    slide, cx + Inches(0.1), cy + img_box_h - Inches(0.02), cell_w - Inches(0.2), caption_h,
+                    item.caption, 10.5, self.theme.text, align=PP_ALIGN.CENTER,
+                    anchor=MSO_ANCHOR.MIDDLE,
+                )
+
+    def _place_image_contained(self, slide, path, box_left, box_top, box_w, box_h):
+        """Place an image inside a box, preserving aspect ratio and centering.
+
+        Returns True if the image was placed, False otherwise (missing/unreadable).
+        """
+        if not path:
+            return False
+        size = _image_size(path)
+        if size is None:
+            # Try to place anyway with width only; if it fails, report failure.
+            try:
+                slide.shapes.add_picture(path, box_left, box_top, width=box_w)
+                return True
+            except Exception:
+                return False
+        iw, ih = size
+        if iw <= 0 or ih <= 0:
+            return False
+        scale = min(box_w / iw, box_h / ih)
+        w = int(iw * scale)
+        h = int(ih * scale)
+        left = int(box_left + (box_w - w) / 2)
+        top = int(box_top + (box_h - h) / 2)
+        try:
+            slide.shapes.add_picture(path, left, top, width=w, height=h)
+            return True
+        except Exception:
+            return False
+
+
+def _grid_columns(n: int) -> int:
+    """Pick a pleasant column count for ``n`` images."""
+    return {1: 1, 2: 2, 3: 3, 4: 2, 5: 3, 6: 3}.get(n, 3 if n <= 9 else 4)
+
+
+def _image_size(path):
+    """Return (width, height) in pixels, or None if it can't be determined.
+
+    Uses Pillow when available, otherwise falls back to reading PNG/JPEG headers
+    directly so galleries render correctly with zero extra dependencies.
+    """
+    try:
+        from PIL import Image  # type: ignore
+
+        with Image.open(path) as im:
+            return im.size
+    except Exception:
+        pass
+    try:
+        with open(path, "rb") as f:
+            head = f.read(32)
+        # PNG: 8-byte signature, then IHDR with width/height as big-endian uint32.
+        if head[:8] == b"\x89PNG\r\n\x1a\n":
+            w, h = struct.unpack(">II", head[16:24])
+            return int(w), int(h)
+        # JPEG: scan for a start-of-frame marker to read dimensions.
+        if head[:2] == b"\xff\xd8":
+            with open(path, "rb") as f:
+                data = f.read()
+            i = 2
+            while i < len(data) - 9:
+                if data[i] != 0xFF:
+                    i += 1
+                    continue
+                marker = data[i + 1]
+                if marker in (0xC0, 0xC1, 0xC2, 0xC3):
+                    h = struct.unpack(">H", data[i + 5:i + 7])[0]
+                    w = struct.unpack(">H", data[i + 7:i + 9])[0]
+                    return int(w), int(h)
+                seg_len = struct.unpack(">H", data[i + 2:i + 4])[0]
+                i += 2 + seg_len
+    except Exception:
+        pass
+    return None
 
 
 def _chart_type(name: str) -> int:

@@ -24,8 +24,10 @@ keep editing: the charts and tables are fully editable.
   OpenAI-compatible) API key, KimiAgent will use it to write richer content.
 - **Native, editable output** — native charts (column/bar/line/pie/area) and
   native tables, not screenshots.
-- **11 slide archetypes** — cover, agenda, section dividers, bullets, two-column,
-  KPI stats, chart, table, quote, image, closing.
+- **12 slide archetypes** — cover, agenda, section dividers, bullets, two-column,
+  KPI stats, chart, table, quote, image, **image gallery**, closing.
+- **Image galleries & portfolios** — drop in a set of images and KimiAgent lays
+  them out in a clean grid, contain-fitting each (no distortion) with captions.
 - **6 professional themes** — `kimi`, `morandi`, `inkwash`, `corporate`,
   `forest`, `midnight`.
 - **Editable intermediate spec.** Every deck is a plain JSON document you can
@@ -171,7 +173,25 @@ See [`examples/sample_spec.json`](examples/sample_spec.json) for a full deck, an
 ### Slide types
 
 `cover` · `agenda` · `section` · `bullets` · `two_column` · `stats` · `chart` ·
-`table` · `quote` · `image` · `closing`
+`table` · `quote` · `image` · `gallery` · `closing`
+
+### Image galleries
+
+The `gallery` slide type arranges a set of images in a responsive grid (1–6+
+per slide), preserving each image's aspect ratio and adding an optional caption:
+
+```json
+{ "type": "gallery", "title": "Portfolio", "images": [
+    { "path": "assets/flyer.png", "caption": "A4 flyer" },
+    { "path": "assets/menu.png",  "caption": "Restaurant menu" }
+]}
+```
+
+`path` may be absolute or relative to your working directory. Pillow is used for
+image sizing when available, with a built-in PNG/JPEG header reader as fallback
+so galleries work with no extra dependencies. See the full worked example in
+[`examples/sanctify/`](examples/sanctify/) (a real agency credentials + portfolio
+deck).
 
 ---
 
