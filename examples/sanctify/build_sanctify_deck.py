@@ -91,20 +91,20 @@ def build(theme: str = "midnight") -> Deck:
             title="A full-suite agency",
             columns=[
                 [
-                    Bullet(text="Digital Marketing", bold_lead="Performance"),
+                    Bullet(text="Performance marketing", bold_lead="Digital"),
                     Bullet(text="Search Engine Optimization (SEO)"),
-                    Bullet(text="Search Engine Marketing (SEM) / PPC"),
+                    Bullet(text="Search Engine Marketing / PPC"),
                     Bullet(text="Social Media Marketing (SMM)"),
-                    Bullet(text="Google, Facebook, Instagram & LinkedIn Ads"),
+                    Bullet(text="Google, Meta & LinkedIn Ads"),
                     Bullet(text="Email marketing & Bulk SMS"),
                 ],
                 [
-                    Bullet(text="Creative & Web", bold_lead="Brand"),
+                    Bullet(text="Creative & web", bold_lead="Brand"),
                     Bullet(text="Website design & development"),
                     Bullet(text="Logo, branding & identity"),
-                    Bullet(text="Graphic design — flyers, banners, catalogues"),
+                    Bullet(text="Graphic design & collateral"),
                     Bullet(text="Online classifieds"),
-                    Bullet(text="Newspaper & outdoor advertising"),
+                    Bullet(text="Newspaper & outdoor ads"),
                 ],
             ],
             notes="We cover the full journey from brand identity through website to demand generation.",
@@ -225,7 +225,8 @@ def build(theme: str = "midnight") -> Deck:
     slides.append(
         Slide(
             type=SlideType.GALLERY,
-            title="Social media — Transport Minister Shri. Mauvin Godinho",
+            title="Public-figure social media",
+            subtitle="Transport Minister Shri. Mauvin Godinho",
             images=[
                 img("image13.png"),
                 img("image14.png"),
@@ -253,14 +254,14 @@ def build(theme: str = "midnight") -> Deck:
     slides.append(
         Slide(
             type=SlideType.QUOTE,
-            quote="Their expertise in SEO, social media and online strategies helped my business rank higher and attract more customers. Professional, responsive, and they truly understand the local market.",
+            quote="Their expertise in SEO and social media helped us rank higher and win more customers — professional, responsive, and truly tuned to the local market.",
             attribution="Benz Nx — SEO & SMM services",
         )
     )
     slides.append(
         Slide(
             type=SlideType.QUOTE,
-            quote="We got our website built by them and continue with their social media marketing — we're very happy with the results. The team responds to our queries with great patience.",
+            quote="They built our website and now run our social media — we're very happy with the results, and the team answers every query with real patience.",
             attribution="Pawan Raj — Web & digital marketing",
         )
     )

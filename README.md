@@ -22,6 +22,8 @@ keep editing: the charts and tables are fully editable.
   coherent deck from just a topic. Zero configuration, no network.
 - **Optional LLM path.** If you *do* have a Kimi / Moonshot (or any
   OpenAI-compatible) API key, KimiAgent will use it to write richer content.
+- **Modern design system** — gradient covers, ghosted section numerals, pill
+  "kicker" labels, rounded cards with soft shadows and oversized display type.
 - **Native, editable output** — native charts (column/bar/line/pie/area) and
   native tables, not screenshots.
 - **12 slide archetypes** — cover, agenda, section dividers, bullets, two-column,
@@ -231,6 +233,21 @@ topic / outline
 - Python 3.9+
 - [`python-pptx`](https://python-pptx.readthedocs.io/) (required)
 - [`openai`](https://pypi.org/project/openai/) (optional — only for the LLM path)
+
+## 🖼️ Previewing without PowerPoint
+
+No PowerPoint or LibreOffice? [`tools/preview_pptx.py`](tools/preview_pptx.py) is
+a small dev helper that rasterizes a `.pptx` to PNG thumbnails (and a contact
+sheet) using Pillow, so you can eyeball a deck in headless environments:
+
+```bash
+pip install Pillow
+python tools/preview_pptx.py deck.pptx preview_out/
+```
+
+(Approximate — gradients/shadows/rounded corners render exactly in real
+PowerPoint. See [`examples/sanctify/preview/`](examples/sanctify/preview/) for
+sample output.)
 
 ## 📄 License
 
