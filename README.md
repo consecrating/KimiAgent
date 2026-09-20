@@ -132,6 +132,7 @@ gracefully** to the offline generator so you always get a deck.
 
 | Theme | Feel |
 |-------|------|
+| `sanctify` | Dark plum gallery wall + magenta/violet — built for creative portfolios |
 | `kimi` | Deep navy ink + warm coral accent — calm, modern (default) |
 | `morandi` | Muted, dusty gallery tones |
 | `inkwash` | Monochrome, editorial, high-contrast |
@@ -175,6 +176,39 @@ See [`examples/sample_spec.json`](examples/sample_spec.json) for a full deck, an
 
 ---
 
+## 🖼️ Portfolio decks
+
+The stock layouts are built for *content* decks. For **visual portfolios** — where
+the artwork is the subject and the words are commentary — use the portfolio
+renderer, which adds three layouts:
+
+| Layout | Purpose |
+|--------|---------|
+| `gallery` | One piece per slide: artwork fitted (never cropped or stretched) on an offset accent block, with a critique column. Composition alternates left/right down the deck. |
+| `grid` | Contact-sheet index of every piece; a short final row is centred. |
+| `contact` | Closing slide for studio contact details. |
+
+```python
+from kimiagent.models import Deck, Slide, SlideType
+from kimiagent.portfolio import render_portfolio
+
+deck = Deck(title="Studio Portfolio", theme="sanctify", slides=[
+    Slide(type=SlideType.GALLERY, title="Popcorn Tub Cover",
+          image_path="art/pack.png",
+          caption="Retail tub wrap where the flavour drives the colour system.",
+          meta={"client": "Sree Foods", "category": "Packaging",
+                "format": "Square · 990×1089px",
+                "palette": ["163673", "B78D3C", "F7E4AB"]}),
+])
+render_portfolio(deck, "portfolio.pptx")
+```
+
+Per-slide extras (client, category, format, sampled palette, logo, section
+numbers) travel in `Slide.meta`, so new layouts never require a model change.
+
+> `gallery` needs [Pillow](https://pypi.org/project/Pillow/) to measure artwork.
+> Without it, images fall back to a 4:3 assumption.
+
 ## 🏗️ Architecture
 
 ```
@@ -202,6 +236,7 @@ topic / outline
 | `kimiagent/agent.py` | Content generation (offline + optional Kimi API) |
 | `kimiagent/prompts.py` | LLM prompt templates |
 | `kimiagent/renderer.py` | Native `.pptx` rendering |
+| `kimiagent/portfolio.py` | Portfolio layouts (`gallery`, `grid`, `contact`) |
 | `kimiagent/cli.py` | Command-line interface |
 
 ---

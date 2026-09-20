@@ -114,6 +114,21 @@ THEMES: Dict[str, Theme] = {
         heading_font="Calibri",
         body_font="Calibri",
     ),
+    # Sanctify: dark plum gallery wall with magenta/violet brand accents.
+    # Built for creative portfolios — artwork reads as lit work on a dark wall.
+    "sanctify": Theme(
+        name="sanctify",
+        primary="2A1B38",       # dark plum (table headers, panels)
+        secondary="C20B58",     # brand magenta
+        background="140F1A",    # deep plum gallery wall
+        surface="231A2E",       # raised panel
+        text="EDE6F5",          # light body text
+        text_muted="9C90AD",
+        text_on_primary="FFFFFF",
+        accents=["C20B58", "7A00DF", "97268F", "E0559B", "5B3FA8"],
+        heading_font="Montserrat",
+        body_font="Poppins",
+    ),
     # Midnight: dark background, vivid accents — great for product/tech.
     "midnight": Theme(
         name="midnight",
