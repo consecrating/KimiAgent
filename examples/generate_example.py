@@ -4,8 +4,8 @@ Run from the repository root::
 
     python examples/generate_example.py
 
-Produces two .pptx files in ./out/ — one from a topic (offline generator)
-and one from the hand-written sample spec — with no API key required.
+Produces a .pptx *and* a .pdf for each of two decks in ./out/ — one from a
+topic (offline generator) and one from the sample spec — with no API key.
 """
 
 import os
@@ -14,7 +14,7 @@ import sys
 # Make the package importable when run directly from the repo (no install needed).
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from kimiagent import DeckAgent, Deck, render_deck
+from kimiagent import Deck, DeckAgent, critique, render_deck, render_pdf
 
 
 def main() -> None:
@@ -28,7 +28,11 @@ def main() -> None:
         theme="kimi",
     )
     render_deck(deck, "out/scaling-a-product-team.pptx")
-    print(f"Built {len(deck.slides)} slides -> out/scaling-a-product-team.pptx")
+    render_pdf(deck, "out/scaling-a-product-team.pdf")
+    print(f"Built {len(deck.slides)} slides -> out/scaling-a-product-team.{{pptx,pdf}}")
+    print(f"  layout variety: {deck.variety_score():.0%} non-bullet content slides")
+    for note in critique(deck):
+        print(f"  note: {note}")
 
     # 2) Render the hand-written sample spec.
     import json
@@ -37,7 +41,8 @@ def main() -> None:
         spec = json.load(f)
     deck2 = Deck.from_dict(spec)
     render_deck(deck2, "out/renewable-energy-2026.pptx")
-    print(f"Built {len(deck2.slides)} slides -> out/renewable-energy-2026.pptx")
+    render_pdf(deck2, "out/renewable-energy-2026.pdf")
+    print(f"Built {len(deck2.slides)} slides -> out/renewable-energy-2026.{{pptx,pdf}}")
 
 
 if __name__ == "__main__":
