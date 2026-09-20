@@ -1,4 +1,9 @@
 python-pptx>=0.6.23
+reportlab>=3.6
+
 # Optional: enable LLM-backed content generation via the Kimi (Moonshot) API.
 # The Kimi platform is OpenAI-compatible, so the official openai SDK is used.
 openai>=1.0.0
+
+# Optional: aspect-ratio-correct placement of images on image slides.
+pillow>=9.0

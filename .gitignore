@@ -22,3 +22,5 @@ output/
 
 # Secrets
 .env
+*.pdf
+.pytest_cache/
