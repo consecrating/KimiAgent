@@ -32,6 +32,9 @@ class SlideType(str, Enum):
     QUOTE = "quote"            # Pull quote
     IMAGE = "image"            # Full-bleed / captioned image
     CLOSING = "closing"        # Thank-you / call to action
+    GALLERY = "gallery"        # Portfolio piece: artwork + written critique
+    GRID = "grid"              # Contact-sheet index of many images
+    CONTACT = "contact"        # Contact / call-to-action details
 
 
 @dataclass
@@ -104,8 +107,13 @@ class Slide:
     quote: str = ""
     attribution: str = ""
     image_path: str = ""
+    images: List[str] = field(default_factory=list)  # for grid / multi-image layouts
     caption: str = ""
     notes: str = ""  # speaker notes
+    # Free-form extras for specialised layouts (e.g. gallery metadata such as
+    # category, client, format or a sampled colour palette). Kept generic so new
+    # layouts never require a model change.
+    meta: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         data: Dict[str, Any] = {"type": self.type.value}
@@ -129,10 +137,14 @@ class Slide:
             data["attribution"] = self.attribution
         if self.image_path:
             data["image_path"] = self.image_path
+        if self.images:
+            data["images"] = list(self.images)
         if self.caption:
             data["caption"] = self.caption
         if self.notes:
             data["notes"] = self.notes
+        if self.meta:
+            data["meta"] = dict(self.meta)
         return data
 
     @classmethod
@@ -168,8 +180,10 @@ class Slide:
             quote=data.get("quote", ""),
             attribution=data.get("attribution", ""),
             image_path=data.get("image_path", ""),
+            images=list(data.get("images", [])),
             caption=data.get("caption", ""),
             notes=data.get("notes", ""),
+            meta=dict(data.get("meta", {})),
         )
 
 
